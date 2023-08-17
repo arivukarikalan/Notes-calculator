@@ -25,8 +25,8 @@ document.addEventListener("DOMContentLoaded", function () {
         taskCard.innerHTML = `
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">${task.taskName}</h5>
-                    <p class="card-text">${task.day}</p>
+                    <h2 class="card-text">${task.day}</h2>
+                    <h3 class="card-title text-success ">${task.taskName}</h3>
                     <p class="card-text">Wage: ${task.wage.toFixed(2)}</p>
                     <p class="card-text">Quantity: ${task.quantity}</p>
                     <p class="card-text">Income: ${task.income.toFixed(2)}</p>
