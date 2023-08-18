@@ -19,7 +19,12 @@
            
             <div class="mb-3">
                 <label for="taskName" class="form-label">Task Name</label>
-                <input type="text" class="form-control" id="taskName" name="taskName" required>
+                <select id="taskName" class="form-control">
+                    <option value="Lass">Lass</option>
+                    <option value="Sadha">sadha</option>
+                    <option value="Joint">Joint</option>
+                    <!-- Add more options as needed -->
+                </select>
             </div>
             <div class="mb-3">
                 <label for="wage" class="form-label">Wage per Task</label>
@@ -29,8 +34,10 @@
                 <label for="quantity" class="form-label">Quantity</label>
                 <input type="number" class="form-control" id="quantity" name="quantity" required>
             </div>
+            <button type="button" id="addTaskButton" class="btn btn-warning">Add Task</button>
             <button type="submit" class="btn btn-primary Calculatebtn">Calculate</button>
         </form>
+        
         <div class="mt-4">
             <h2>Entered Tasks</h2>
             <div id="tasksContainer" class="row">
