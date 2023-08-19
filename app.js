@@ -1,159 +1,157 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("wageForm");
-    const tasksContainer = document.getElementById("tasksContainer");
-    const calculateWeeklyIncomeButton = document.getElementById("calculateWeeklyIncomeButton");
-    const weeklyIncomeDisplay = document.getElementById("totalincome"); // Add an element to display weekly income
-    // Load tasks from local storage and display them
 
-    const taskDetails = []; // To store the added task details
+const form = document.getElementById('tailorForm');
+const dressList = document.getElementById('dressList');
+const totalElement = document.getElementById('total');
+const daySelect = document.getElementById('taskDay');
+ const dressTypeSelect = document.getElementById('dressType');
+ const priceInput = document.getElementById('price');
 
-    const addTaskButton = document.getElementById("addTaskButton");
-
-    addTaskButton.addEventListener("click", function () {
-    addTaskDetails();
-    });
-
-function addTaskDetails() {
-    const day = document.getElementById("day").value;
-    const taskName = document.getElementById("taskName").value;
-    const wage = parseFloat(document.getElementById("wage").value);
-    const quantity = parseFloat(document.getElementById("quantity").value);
-    const income = wage * quantity;
-
-    taskDetails.push({
-        day:day,
-        taskName: taskName,
-        wage: wage,
-        quantity: quantity,
-        income: income
-    });
-
-    // Clear the input fields
-    document.getElementById("taskName").value = "";
-    document.getElementById("wage").value = "";
-    document.getElementById("quantity").value = "";
-
-    console.log(taskDetails)
-}
-
-    function loadTasks() {
-        const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-       
-
-        savedTasks.forEach(task => {
-            const taskCard = createTaskCard(task);
-            tasksContainer.appendChild(taskCard);
-        });
-        taskDetails.forEach(task => {
-            const taskCard = createTaskCard(task);
-            tasksContainer.appendChild(taskCard);
-        });
-    }
-
-    // Save tasks to local storage
-    
-    // Create a task card
-    function createTaskCard(task, index) {
-        const taskCard = document.createElement("div");
-        taskCard.classList.add("col-md-4", "mb-3");
-        taskCard.innerHTML = `
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="card-text">${task.day}</h2>
-                    <h3 class="card-title text-success ">${task.taskName}</h3>
-                    <p class="card-text">Wage: ${task.wage.toFixed(2)}</p>
-                    <p class="card-text">Quantity: ${task.quantity}</p>
-                    <p class="card-text">Income: ${task.income.toFixed(2)}</p>
-                    <button class="btn btn-danger btn-sm" data-index="${index}">Remove</button>
-                </div>
-            </div>
-        `;
-       
-
-        taskCard.querySelector("button").addEventListener("click", function () {
-            removeTask(index);
-            console.log(index)
-        });
-    
-        return taskCard;
-    }
+    dressTypeSelect.addEventListener('change', setPrice);
   
-    
- 
-   
+    const prices = {
+        Lass: 3.5,
+        Sadha: 2.0,
+        Joint: 5
+    };
 
-    document.getElementById("clearAllButton").addEventListener("click", clearAllTasks);
-    
-    function clearAllTasks() {
-        localStorage.removeItem("tasks");
-        updateTasksDisplay([]); 
-        totalWeeklyIncome();
-        // Clear the displayed tasks
+    function setPrice() {
+        const selectedDressType = dressTypeSelect.value;
+        const price = prices[selectedDressType];
+
+        // Update the price input field
+        priceInput.value = price;
     }
-    calculateWeeklyIncomeButton.addEventListener("click", totalWeeklyIncome);
-    function totalWeeklyIncome () {
-        const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-        const totalWeeklyIncome = savedTasks.reduce((total, task) => total + task.income, 0);
-        weeklyIncomeDisplay.textContent = `Total Weekly Income:${totalWeeklyIncome.toFixed(2)}`;
+    let tasksByDay = {};
+    const dayIncomeElements = {};
+// At the beginning of your script
+window.addEventListener('load', function() {
+    let storedTasksByDay = localStorage.getItem('tasksByDay');
+    const storedDayIncomeElements = localStorage.getItem('dayIncomeElements');
+    const storedTotal = localStorage.getItem('total');
+
+    if (storedTasksByDay) {
+        tasksByDay = JSON.parse(storedTasksByDay);
+        for (const day in tasksByDay) {
+            updateDayTasks(day);
+        }
+        updateTotal();
     }
 
-
-   
-     // Load saved tasks on page load
-     loadTasks();
-
-    form.addEventListener("submit", function (event) {
-        event.preventDefault(); // Prevent the default form submission
-
-        const day = document.getElementById("day").value;
+    if (storedDayIncomeElements) {
        
-        const taskNameSelect = document.getElementById("taskName"); // Get the dropdown element
-        const taskName = taskNameSelect.options[taskNameSelect.selectedIndex].text; // Get the selected option text
-        const wage = parseFloat(document.getElementById("wage").value);
-        const quantity = parseFloat(document.getElementById("quantity").value);
-      
+        for (const day in dayIncomeElements) {
+            updateDayIncome(day);
+        }
+    }
+    
+    if (storedTotal) {
+        totalElement.textContent = storedTotal;
+    }
+});
 
-        // Save task data to local storage
-        const newTask = {
-            day: day,
-            taskName: taskName,
-            wage: wage,
-            quantity: quantity,
-            income: wage * quantity
-        };
+   
+form.addEventListener('submit', function(event) {
+    event.preventDefault();
 
-        taskDetails.push(newTask);
+    const dressName = document.getElementById('dressType').value;
+    const price = parseFloat(document.getElementById('price').value);
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const selectedDay = daySelect.value;
 
-        const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-        const allTasks = [...savedTasks, ...taskDetails];
+    const dressTotal = price * quantity;
+    
+    if (!tasksByDay[selectedDay]) {
+        tasksByDay[selectedDay] = [];
+        dayIncomeElements[selectedDay] = document.createElement('p');
+        dressList.appendChild(dayIncomeElements[selectedDay]);
+    }
+    
+    const newTask = {
+        dressName: dressName,
+        price: price,
+        quantity: quantity,
+        total: dressTotal
+    };
+    
+    tasksByDay[selectedDay].push(newTask);
+    
+    updateDayTasks(selectedDay);
+    updateTotal();
+    updateDayIncome(selectedDay);
 
-        // Save combined task data to local storage
-        localStorage.setItem("tasks", JSON.stringify(allTasks));
+    localStorage.setItem('tasksByDay', JSON.stringify(tasksByDay));
 
-    // Clear task details array after saving
-         taskDetails.length = 0;
-        loadTasks(); // Load and display all tasks, including added task details
-     
-        // Clear form inputs
-        form.reset();
+    // Clear form inputs
+    document.getElementById('dressType').value = '';
+    document.getElementById('price').value = '';
+    document.getElementById('quantity').value = '';
+    
+});
+
+
+
+function updateDayIncome(selectedDay) {
+    const dayTasks = tasksByDay[selectedDay];
+    let dayTotalIncome = 0;
+
+    dayTasks.forEach(task => {
+        dayTotalIncome += task.total;
     });
-      function removeTask(index) {
-    const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    console.log(savedTasks)
-    savedTasks.splice(index, 1);
-    saveTasks(savedTasks);
-    updateTasksDisplay(savedTasks);
-    totalWeeklyIncome(savedTasks); 
-    }
-     function updateTasksDisplay(tasks) {
-        tasksContainer.innerHTML = "";
-        tasks.forEach((task, index) => {
-            const taskCard = createTaskCard(task, index);
-            tasksContainer.appendChild(taskCard);
-        });
-    }
-    function saveTasks(tasks) {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
+
+    dayIncomeElements[selectedDay].textContent = `Total Income: $${dayTotalIncome.toFixed(2)}`;
+    localStorage.setItem('dayIncomeElements', JSON.stringify(dayIncomeElements));
 }
 
-});
+const clearAllButton = document.getElementById('clearAllButton');
+clearAllButton.addEventListener('click', clearAllTasks);
+
+function clearAllTasks() {
+   
+    dressList.innerHTML = '';
+    localStorage.removeItem('tasksByDay');
+    totalElement.innerHTML = localStorage.getItem(total);
+    localStorage.setItem('total',"0")
+}
+
+function removeTask(selectedDay, taskIndex) {
+    tasksByDay[selectedDay].splice(taskIndex, 1);
+    updateDayTasks(selectedDay);
+    updateTotal();
+    updateDayIncome(selectedDay);
+    localStorage.setItem('tasksByDay', JSON.stringify(tasksByDay));
+}
+
+function updateDayTasks(selectedDay) {
+    const dayContainer = document.getElementById(selectedDay) || createDayContainer(selectedDay);
+    const dayTasks = tasksByDay[selectedDay];
+    
+    dayContainer.innerHTML = `<h3>${selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}</h3>`;
+    
+    dayTasks.forEach(task => {
+        const listItem = document.createElement('li');
+        listItem.className = 'list-group-item';
+        listItem.innerHTML = `
+            ${task.dressName} - $${task.price.toFixed(2)} x ${task.quantity} = $${task.total.toFixed(2)}
+            <button class="btn btn-sm btn-danger float-end" onclick="removeTask('${selectedDay}', ${dayTasks.indexOf(task)})">Remove</button>
+        `;
+        dayContainer.appendChild(listItem);
+    });
+}
+
+function createDayContainer(selectedDay) {
+    const newDayContainer = document.createElement('div');
+    newDayContainer.id = selectedDay;
+    dressList.appendChild(newDayContainer);
+    return newDayContainer;
+}
+
+function updateTotal() {
+    let total = 0;
+    for (const day in tasksByDay) {
+        tasksByDay[day].forEach(task => {
+            total += task.total;
+        });
+    }
+    totalElement.textContent = total.toFixed(2);
+    localStorage.setItem('total', total.toFixed(2));
+}
