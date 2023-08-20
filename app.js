@@ -98,7 +98,7 @@ function updateDayIncome(selectedDay) {
         dayTotalIncome += task.total;
     });
 
-    dayIncomeElements[selectedDay].textContent = `Total Income: $${dayTotalIncome.toFixed(2)}`;
+    dayIncomeElements[selectedDay].textContent = ` Income: $${dayTotalIncome.toFixed(2)}`;
     localStorage.setItem('dayIncomeElements', JSON.stringify(dayIncomeElements));
 }
 
@@ -125,11 +125,11 @@ function updateDayTasks(selectedDay) {
     const dayContainer = document.getElementById(selectedDay) || createDayContainer(selectedDay);
     const dayTasks = tasksByDay[selectedDay];
     
-    dayContainer.innerHTML = `<h3>${selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}</h3>`;
+    dayContainer.innerHTML = `<h3 class="text-primary">${selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}</h3>`;
     
     dayTasks.forEach(task => {
         const listItem = document.createElement('li');
-        listItem.className = 'list-group-item';
+        listItem.className = 'list-group-item ,p-5';
         listItem.innerHTML = `
             ${task.dressName} - $${task.price.toFixed(2)} x ${task.quantity} = $${task.total.toFixed(2)}
             <button class="btn btn-sm btn-danger float-end" onclick="removeTask('${selectedDay}', ${dayTasks.indexOf(task)})">Remove</button>
